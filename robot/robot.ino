@@ -4,9 +4,10 @@
 
 char WiFibuff[6];
 WiFiUDP UDP;
-IPAddress myIP(192, 168, 4, 1);
-const char *ssid = "Ryo Suzuki";
-const char *password = "ryotomomi";
+IPAddress myIP;
+//IPAddress myIP(192, 168, 4, 1);
+const char *ssid = "UCB Wireless";
+const char *password = "";
 int localPort = 893;
 
 int a1 = 0;  // D3
@@ -44,21 +45,40 @@ void setup() {
 
   Serial.begin(9600);
 
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP(ssid, password);
-  WiFi.config(myIP, WiFi.gatewayIP(), WiFi.subnetMask());
-  UDP.begin(localPort);
+//  WiFi.mode(WIFI_AP);
+//  WiFi.softAP(ssid, password);
+//  WiFi.config(myIP, WiFi.gatewayIP(), WiFi.subnetMask());
+//  UDP.begin(localPort);
 
   Serial.println("UDP start");
+
+  WiFi.hostname("Name");
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  myIP = WiFi.localIP();
+  Serial.print("AP IP address: ");
+  Serial.println(myIP);
+  UDP.begin(localPort);
+  off();
+
 }
 
 void receiveWiFi() {
-  UDP.read(WiFibuff, 6);
+  UDP.read(WiFibuff, 8);
   Serial.println(WiFibuff);
   UDP.flush();
 }
 
+int dir = 0;
+
 void loop() {
+//  Serial.println(digitalRead(s1));
+//  Serial.println(map(analogRead(s2), 0, 1023, 0, 1));
+
   if (UDP.parsePacket() > 0) {
     receiveWiFi();
 
@@ -75,16 +95,16 @@ void loop() {
       analogWrite(b2, speed);
       Serial.println("backward");
     } else if(WiFibuff[2] == '0') {
-      analogWrite(a1, speed);
+      analogWrite(a1, speed-150);
       analogWrite(a2, 0);
-      analogWrite(b1, speed);
+      analogWrite(b1, speed-150);
       analogWrite(b2, 0);
       Serial.println("left");
     } else if(WiFibuff[3] == '0') {
       analogWrite(a1, 0);
-      analogWrite(a2, speed);
+      analogWrite(a2, speed-150);
       analogWrite(b1, 0);
-      analogWrite(b2, speed);
+      analogWrite(b2, speed-150);
       Serial.println("right");
     } else {
       analogWrite(a1, 0);
@@ -95,35 +115,49 @@ void loop() {
     }
 
     if(WiFibuff[4] == '0') {
-      if (currentPos >= maxLength) {
-        stop(1);
-        stop(2);
-      } else {
-        up(1);
-        up(2);
-        currentPos = currentPos + 1;
-      }
-      Serial.println(currentPos);
+      dir = 1;
     } else if(WiFibuff[5] == '0') {
-      if (currentPos <= 0) {
-        stop(1);
-        stop(2);
-      } else {
-        down(1);
-        down(2);
-        currentPos = currentPos - 1;
-        if (digitalRead(s1) == 0 || map(analogRead(s2), 0, 1023, 0, 1) == 0) {
-          currentPos = 0;
-          stop(1);
-          stop(2);
-        }
-      }
-      Serial.println(currentPos);
+      dir = -1;
     } else {
+      dir = 0;
       stop(1);
-      stop(2);
+      stop(2);      
+    }
+
+    if (WiFibuff[6] == '0') {
+       initialize(1);
+    }
+    if (WiFibuff[7] == '0') {
+       initialize(2);      
     }
   }
+
+  if (dir > 0) {
+    if (currentPos >= maxLength) {
+      stop(1);
+      stop(2);
+    } else {
+      up(1);
+      up(2);
+      currentPos = currentPos + 1;
+    }
+    Serial.println(currentPos);    
+  }
+  if (dir < 0) {
+    if (digitalRead(s1) == 0) {
+      currentPos = 0;
+      stop(1);
+    } else {
+      down(1);
+      currentPos = currentPos - 1;
+    }
+    if (map(analogRead(s2), 0, 1023, 0, 1) == 0) {
+      stop(2);
+    } else {
+      down(2);
+    }  
+    Serial.println(currentPos);    
+  }  
 }
 
 
@@ -139,24 +173,16 @@ void off() {
   digitalWrite(d2, LOW);
 }
 
-void init(int num) {
+void initialize(int num) {
   while (true) {
     down(num);
     delay(1);
     if (digitalRead(s1) == 0) {
-      pause(num);
-      delay(100);
-      up(num);
-      delay(500);
       currentPos = 0;
       off();
       break;
     }
     if (map(analogRead(s2), 0, 1023, 0, 1) == 0) {
-      pause(num);
-      delay(100);
-      up(num);
-      delay(500);
       currentPos = 0;
       off();
       break;

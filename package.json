@@ -1,0 +1,23 @@
+{
+  "name": "shapebots-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "controller-test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryosuzuki/shapebots-demo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ryosuzuki/shapebots-demo/issues"
+  },
+  "homepage": "https://github.com/ryosuzuki/shapebots-demo#readme",
+  "dependencies": {
+    "serialport": "^7.1.5"
+  }
+}
