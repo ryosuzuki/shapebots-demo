@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/ryosuzuki/shapebots-demo#readme",
   "dependencies": {
+    "keypress": "^0.2.1",
     "serialport": "^7.1.5"
   }
 }

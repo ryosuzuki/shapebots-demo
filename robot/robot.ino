@@ -6,8 +6,8 @@ char WiFibuff[6];
 WiFiUDP UDP;
 IPAddress myIP;
 //IPAddress myIP(192, 168, 4, 1);
-const char *ssid = "UCB Wireless";
-const char *password = "";
+const char *ssid = "Ryo Suzuki";
+const char *password = "ryotomomi";
 int localPort = 893;
 
 int a1 = 0;  // D3
@@ -145,16 +145,16 @@ void loop() {
   }
   if (dir < 0) {
     if (digitalRead(s1) == 0) {
-      currentPos = 0;
       stop(1);
     } else {
       down(1);
-      currentPos = currentPos - 1;
     }
     if (map(analogRead(s2), 0, 1023, 0, 1) == 0) {
+      currentPos = 0;
       stop(2);
     } else {
       down(2);
+      currentPos = currentPos - 1;      
     }  
     Serial.println(currentPos);    
   }  
